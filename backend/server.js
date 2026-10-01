@@ -24,6 +24,9 @@ import { buildCity } from './engine/buildCity.js';
 const PORT = process.env.PORT || 3001;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/codecity';
 
+const SERVER_STARTED_AT = new Date().toISOString(); //current date stored when server started
+const SERVER_START_TIME = Date.now();              //current time stored when server started
+
 await connectDb(MONGO_URI);
 
 const app = express();
@@ -35,8 +38,15 @@ app.use(express.json());
 /** jobId -> { status: 'running'|'done'|'error', message?, city?, error? } */
 const jobs = new Map();
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', db: isDbConnected() });
+app.get('/api/health', (req, res) => {  //displays this information when you open the health-check URL in your browser. just shows since how many seconds the server is running from
+  res.json({
+    status: 'ok',                 
+    db: isDbConnected(),
+    startedAt: SERVER_STARTED_AT,
+    uptimeSeconds: Math.floor(
+      (Date.now() - SERVER_START_TIME) / 1000
+    ),
+  });
 });
 
 app.post('/api/analyze', async (req, res) => {
