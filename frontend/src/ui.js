@@ -219,3 +219,153 @@ export function initSearch(getData, onPick) {
     input.focus();
   });
 }
+
+
+// ---------- Clear Search Button ----------------------------------------------
+// What it does:
+// 1. Shows a clear (×) button when the user types in the search box.
+// 2. Clears the search text when the button is clicked.
+// 3. Closes the search results list.
+// 4. Resets the search results and focuses the input again.
+// 5. Keeps the existing search functionality unchanged.
+
+export function initSearch(getData, onPick) {
+  const input = $('search-input');
+  const list = $('search-results');
+  let hits = [];
+  let cursor = 0;
+
+  // Create the clear search button
+  const clearBtn = el('button', {
+    type: 'button',
+    class: 'search-clear',
+    title: 'Clear search',
+    'aria-label': 'Clear search',
+    hidden: true,
+
+    onclick: () => {
+      input.value = '';
+      hits = [];
+      close();
+      clearBtn.hidden = true;
+      input.focus();
+    },
+  }, '×');
+
+  // Place the button immediately after the search input
+  input.insertAdjacentElement('afterend', clearBtn);
+
+  const close = () => {
+    list.hidden = true;
+  };
+
+  const choose = (b) => {
+    close();
+    input.value = '';
+    clearBtn.hidden = true;
+    input.blur();
+    onPick(b);
+  };
+
+  const render = () => {
+    if (!hits.length) {
+      list.replaceChildren(
+        el('div', { class: 'empty' }, 'No files match.')
+      );
+    } else {
+      list.replaceChildren(
+        ...hits.map((b, i) =>
+          el('button', {
+            class: i === cursor ? 'on' : '',
+            onmousedown: (e) => {
+              e.preventDefault();
+              choose(b);
+            },
+          },
+            el('i', {
+              style: { background: b.color },
+            }),
+            el('span', { class: 'r-name' },
+              b.path.split('/').pop()
+            ),
+            el('span', { class: 'r-path' }, b.path)
+          )
+        )
+      );
+    }
+
+    list.hidden = false;
+  };
+
+  // Search files and show/hide the clear button
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+
+    // Show the clear button only when text is entered
+    clearBtn.hidden = !q;
+
+    const data = getData();
+
+    if (!q || !data) {
+      hits = [];
+      close();
+      return;
+    }
+
+    const score = (b) => {
+      const name = b.path.split('/').pop().toLowerCase();
+
+      if (name.startsWith(q)) return 0;
+      if (name.includes(q)) return 1;
+      if (b.path.toLowerCase().includes(q)) return 2;
+
+      return 9;
+    };
+
+    hits = data.buildings
+      .map((b) => [score(b), b])
+      .filter(([s]) => s < 9)
+      .sort((a, b) =>
+        a[0] - b[0] || b[1].maxLoc - a[1].maxLoc
+      )
+      .slice(0, 12)
+      .map(([, b]) => b);
+
+    cursor = 0;
+    render();
+  });
+
+  // Keyboard navigation for search results
+  input.addEventListener('keydown', (e) => {
+    if (list.hidden) return;
+
+    if (e.key === 'ArrowDown') {
+      cursor = Math.min(cursor + 1, hits.length - 1);
+      render();
+      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      cursor = Math.max(cursor - 1, 0);
+      render();
+      e.preventDefault();
+    } else if (e.key === 'Enter' && hits[cursor]) {
+      choose(hits[cursor]);
+      e.preventDefault();
+    } else if (e.key === 'Escape') {
+      close();
+      input.blur();
+    }
+  });
+
+  input.addEventListener('blur', () => setTimeout(close, 120));
+
+  // Press "/" to focus search from anywhere except text fields
+  document.addEventListener('keydown', (e) => {
+    if (
+      e.key !== '/' ||
+      e.target.matches('input, textarea')
+    ) return;
+
+    e.preventDefault();
+    input.focus();
+  });
+}
