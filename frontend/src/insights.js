@@ -109,8 +109,17 @@ function sizeRanks(data) {
  * who created it, who maintains it, how it grew — rather than guessed at.
  */
 export function fileProfile(data, b, t) {
-  const loc = locAt(b.history, t).loc;
-  const ranks = sizeRanks(data);
+  const loc = locAt(b.history, t).loc;  // lines of code at this point in history
+
+  // Find the file's initial size when it first had lines of code
+  const initialLoc = b.history.find((h) => h.loc > 0)?.loc || 0; // initial lines of code when the file was created
+
+  // Calculate growth percentage safely
+  const growthPct = initialLoc > 0
+    ? ((loc - initialLoc) / initialLoc) * 100 // Calculate growth percentage safely 
+    : null;
+
+  const ranks = sizeRanks(data);  // all files' peak sizes, sorted ascending
 
   // Upper-bound search: how many files are no bigger than this one at peak?
   let lo = 0, hi = ranks.length;
