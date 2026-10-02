@@ -352,9 +352,8 @@ export class Scene {
       dist * 0.78,
       center.z + dist * 0.62
     );
-    this.controls.target.set(center.x, 0, center.z);
+    this.controls.target.copy(center); // Before The camera always targets ground level (y = 0).After The camera targets the complete center position, including its height (center.y).
     this.controls.update();
-  }
 
   _animate() {
     this._clock = this._clock || new THREE.Clock();
