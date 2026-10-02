@@ -274,7 +274,7 @@ function load(next) {
 }
 
 initSearch(() => data, (b) => showInCity(b));
-// App information for debugging
+// App information for debugging shows app loaded successfully
 console.log("CodeCity initialized successfully 🚀");
 console.log("Available views:", VIEWS);
 
@@ -285,6 +285,9 @@ console.log("Available views:", VIEWS);
   try {
     load(await loadStaticCity());
     hideToast();
+    console.log(  //Measures application startup performance.Added performance monitoring.
+    `City loaded in ${(performance.now() - APP_START).toFixed(2)} ms`
+ );
     // Start the city building itself, the way it's meant to be seen.
     if (currentView() === 'city') timeline.play();
   } catch {
