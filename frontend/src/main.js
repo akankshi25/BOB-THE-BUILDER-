@@ -274,6 +274,9 @@ function load(next) {
 }
 
 initSearch(() => data, (b) => showInCity(b));
+// App information for debugging
+console.log("CodeCity initialized successfully 🚀");
+console.log("Available views:", VIEWS);
 
 // First load: the bundled demo city.
 (async () => {
