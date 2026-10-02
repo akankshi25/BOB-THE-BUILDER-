@@ -10,7 +10,7 @@
       name="description"
       content="Explore your codebase as an interactive 3D city and visualize repository structure, file history, and code health."
     />
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -71,9 +71,20 @@
         </div>
 
         <div class="popover-anchor">
-          <button class="icon-btn" id="settings-btn" title="Display settings" aria-haspopup="dialog" aria-expanded="false">
-            <span class="ms">tune</span>
+          <!-- Accessibility Enhancement:
+          aria-label provides a clear description of the button for screen readers.
+          aria-hidden="true" prevents the decorative close icon from being read aloud.
+          This improves accessibility without changing the button's appearance or functionality. -->
+         <button
+            class="icon-btn"
+            id="ins-close"
+            title="Close inspector"
+            aria-label="Close file inspector"
+            >
+           
+          <span class="ms" aria-hidden="true">close</span>
           </button>
+         
           <div class="popover settings-pop" id="settings" hidden>
             <label class="toggle">
               <span><b>District labels</b><small>Folder names over the city</small></span>
